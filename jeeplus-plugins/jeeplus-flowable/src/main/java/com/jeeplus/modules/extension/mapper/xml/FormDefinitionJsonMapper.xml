@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.FormDefinitionJsonMapper">
+
+	<sql id="formDefinitionJsonColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.form_definition_id AS "formDefinitionId",
+		a.json AS "json",
+		a.version AS "version",
+		a.status AS "status",
+		a.is_primary AS "isPrimary"
+	</sql>
+
+	<sql id="formDefinitionJsonJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="FormDefinitionJson" >
+		SELECT
+			<include refid="formDefinitionJsonColumns"/>
+		FROM act_extension_form_def_json a
+		<include refid="formDefinitionJsonJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="FormDefinitionJson" >
+		SELECT
+			<include refid="formDefinitionJsonColumns"/>
+		FROM act_extension_form_def_json a
+		<include refid="formDefinitionJsonJoins"/>
+		<where>
+
+			${dataScope}
+			<if test="formDefinitionId != null and formDefinitionId != ''">
+				AND a.form_definition_id = #{formDefinitionId}
+			</if>
+			<if test="version != null and version != ''">
+				AND a.version = #{version}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="isPrimary != null and isPrimary != ''">
+				AND a.is_primary = #{isPrimary}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.version asc
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getMaxVersion" resultType="Integer" >
+			SELECT
+		<if test="_databaseId == 'postgre'"> IFNULL(MAX(a.version),0)</if>
+		<if test="_databaseId == 'oracle'"> nvl(MAX(a.version),0)</if>
+		<if test="_databaseId == 'mysql'"> IFNULL(MAX(a.version),0)</if>
+		<if test="_databaseId == 'mssql'"> IFNULL(MAX(a.version),0)</if>
+			         as maxVersion FROM act_extension_form_def_json a where  a.form_definition_id = #{formDefinitionId}
+	</select>
+
+	<select id="findAllList" resultType="FormDefinitionJson" >
+		SELECT
+			<include refid="formDefinitionJsonColumns"/>
+		FROM act_extension_form_def_json a
+		<include refid="formDefinitionJsonJoins"/>
+		<where>
+
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.version asc
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_form_def_json(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			form_definition_id,
+			json,
+			version,
+			status,
+			is_primary
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{formDefinitionId},
+			#{json},
+			#{version},
+			#{status},
+			#{isPrimary}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_form_def_json SET
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			form_definition_id = #{formDefinitionId},
+			json = #{json},
+			version = #{version},
+			status = #{status},
+			is_primary = #{isPrimary}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updatePrimary">
+		UPDATE act_extension_form_def_json SET
+		  is_primary = #{isPrimary}
+		WHERE form_definition_id = #{formDefinitionId}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_form_def_json
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteByFormDefinitionId">
+		DELETE FROM act_extension_form_def_json
+		WHERE form_definition_id = #{formDefinitionId}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_form_def_json SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FormDefinitionJson">
+		select * FROM act_extension_form_def_json  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

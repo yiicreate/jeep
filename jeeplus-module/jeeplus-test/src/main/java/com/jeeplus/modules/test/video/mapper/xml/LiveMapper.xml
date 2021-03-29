@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.video.mapper.LiveMapper">
+
+	<sql id="liveColumns">
+		a.id AS "id",
+		a.step AS "step",
+		a.plan_start AS "planStart",
+		a.plan_end AS "planEnd",
+		a.type AS "type",
+		a.group_id AS "groupId",
+		a.introduction AS "introduction",
+		a.title AS "title",
+		a.end_time AS "endTime",
+		a.start_time AS "startTime",
+		a.live_uuid AS "liveUuid",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+-- 		a.update_by AS "updateBy.id",
+-- 		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.name as "createBy.name",
+		b.photo as "createBy.photo"
+	</sql>
+
+	<sql id="liveJoins">
+		LEFT JOIN sys_user b ON b.id = a.create_by
+	</sql>
+
+
+	<select id="get" resultType="Live" >
+		SELECT
+			<include refid="liveColumns"/>
+		FROM test_video_live a
+		<include refid="liveJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Live" >
+		SELECT
+			<include refid="liveColumns"/>
+		FROM test_video_live a
+		<include refid="liveJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="type!=null and type!=''">
+				and a.type = #{type}
+			</if >
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.plan_start
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Live" >
+		SELECT
+			<include refid="liveColumns"/>
+		FROM test_video_live a
+		<include refid="liveJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO test_video_live(
+			id,
+			step,
+			plan_start,
+			plan_end,
+			type,
+			group_id,
+			introduction,
+			title,
+			end_time,
+			start_time,
+			live_uuid,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{step},
+			#{planStart},
+			#{planEnd},
+			#{type},
+			#{groupId},
+			#{introduction},
+			#{title},
+			#{endTime},
+			#{startTime},
+			#{liveUuid},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_video_live SET
+			step = #{step},
+			plan_start = #{planStart},
+			plan_end = #{planEnd},
+			type = #{type},
+			group_id = #{groupId},
+			introduction = #{introduction},
+			title = #{title},
+			end_time = #{endTime},
+			start_time = #{startTime},
+			live_uuid = #{liveUuid},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM test_video_live
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE test_video_live SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Live">
+		select * FROM test_video_live  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

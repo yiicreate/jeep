@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.committee.mapper.IntegralDetailMapper">
+
+	<sql id="integralDetailColumns">
+		a.id AS "id",
+		a.ci_id AS "ci.id",
+		a.integral AS "integral",
+		a.integral_type AS "integralType",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="integralDetailJoins">
+
+			LEFT JOIN committee_integral b ON b.id = a.ci_id
+	</sql>
+
+
+	<select id="get" resultType="IntegralDetail" >
+		SELECT
+			<include refid="integralDetailColumns"/>
+		FROM integral_detail a
+		<include refid="integralDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="IntegralDetail" >
+		SELECT
+			<include refid="integralDetailColumns"/>
+		FROM integral_detail a
+		<include refid="integralDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="ci != null and ci.id != null and ci.id != ''">
+				AND a.ci_id = #{ci.id}
+			</if>
+			<if test="integralType != null and integralType != ''">
+				AND a.integral_type = #{integralType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="IntegralDetail" >
+		SELECT
+			<include refid="integralDetailColumns"/>
+		FROM integral_detail a
+		<include refid="integralDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO integral_detail(
+			id,
+			ci_id,
+			integral,
+			integral_type,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{ci.id},
+			#{integral},
+			#{integralType},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE integral_detail SET
+			ci_id = #{ci.id},
+			integral = #{integral},
+			integral_type = #{integralType},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM integral_detail
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE ci_id = #{ci.id}
+			</otherwise>
+		</choose>
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE integral_detail SET
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE ci_id = #{ci.id}
+			</otherwise>
+		</choose>
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="IntegralDetail">
+		select * FROM integral_detail  where ${propertyName} = #{value}
+	</select>
+
+	<select id="countIntegral" resultType="integer">
+		select sum(detail.integral) FROM integral_detail detail left join committee_integral m on detail.ci_id = m.id where m.committee_id = #{userId}
+	</select>
+
+</mapper>

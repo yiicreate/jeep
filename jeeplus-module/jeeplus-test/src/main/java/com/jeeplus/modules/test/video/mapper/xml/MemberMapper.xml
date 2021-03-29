@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.video.mapper.MemberMapper">
+
+	<sql id="memberColumns">
+		a.id AS "id",
+		a.uid AS "uid",
+		a.is_in AS "isIn",
+		a.live_id AS "liveId",
+		a.launch AS "launch",
+		a.end_time AS "endTime",
+		a.start_time AS "startTime",
+		a.user_id AS "userId",
+-- 		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+-- 		a.update_by AS "updateBy.id",
+-- 		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.name as "name",
+		b.photo as "photo"
+	</sql>
+
+	<sql id="memberJoins">
+		LEFT JOIN sys_user b ON b.id = a.user_id
+	</sql>
+
+
+	<select id="get" resultType="Member" >
+		SELECT
+			<include refid="memberColumns"/>
+		FROM test_video_member a
+		<include refid="memberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Member" >
+		SELECT
+			<include refid="memberColumns"/>
+		FROM test_video_member a
+		<include refid="memberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListByLive" resultType="Member" >
+		SELECT
+		<include refid="memberColumns"/>
+		FROM test_video_member a
+		<include refid="memberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			AND live_id = #{id}
+		</where>
+		<choose>
+			<otherwise>
+				ORDER BY a.create_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Member" >
+		SELECT
+			<include refid="memberColumns"/>
+		FROM test_video_member a
+		<include refid="memberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO test_video_member(
+			id,
+			uid,
+			is_in,
+			live_id,
+			launch,
+			end_time,
+			start_time,
+			user_id,
+			name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{uid},
+			#{isIn},
+			#{liveId},
+			#{launch},
+			#{endTime},
+			#{startTime},
+			#{userId},
+			#{name},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_video_member SET
+			uid = #{uid},
+			is_in = #{isIn},
+			live_id = #{liveId},
+			launch = #{launch},
+			end_time = #{endTime},
+			start_time = #{startTime},
+			user_id = #{userId},
+			name = #{name},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM test_video_member
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE test_video_member SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteByLive">
+		DELETE FROM test_video_member
+		WHERE live_id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Member">
+		select * FROM test_video_member  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

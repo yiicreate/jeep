@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.FlowCopyMapper">
+
+	<sql id="flowCopyColumns">
+		a.id AS "id",
+		a.userid AS "userId",
+		a.procdefid AS "procDefId",
+		a.procinsid AS "procInsId",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.procdefname AS "procDefName",
+		a.procinsname AS "procInsName",
+		a.taskname AS "taskName",
+		createBy.name AS "createBy.name"
+	</sql>
+
+	<sql id="flowCopyJoins">
+
+		LEFT JOIN sys_user createBy ON createBy.id = a.create_by
+	</sql>
+
+
+	<select id="get" resultType="FlowCopy" >
+		SELECT
+			<include refid="flowCopyColumns"/>
+		FROM act_extension_cc a
+		<include refid="flowCopyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="FlowCopy" >
+		SELECT
+			<include refid="flowCopyColumns"/>
+		FROM act_extension_cc a
+		<include refid="flowCopyJoins"/>
+		<where>
+
+			a.userid = #{currentUser.id}
+			<if test="procInsName != null and procInsName != ''">
+				AND a.procinsname LIKE
+				<if test="_databaseId == 'postgre'">'%'||#{procInsName}||'%'</if>
+				<if test="_databaseId == 'oracle'">'%'||#{procInsName}||'%'</if>
+				<if test="_databaseId == 'mssql'">'%'+#{procInsName}+'%'</if>
+				<if test="_databaseId == 'mysql'">concat('%',#{procInsName},'%')</if>
+			</if>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="FlowCopy" >
+		SELECT
+			<include refid="flowCopyColumns"/>
+		FROM act_extension_cc a
+		<include refid="flowCopyJoins"/>
+		<where>
+
+			${dataScope}
+			<if test="procInsName != null and procInsName != ''">
+				AND a.procinsname LIKE
+				<if test="_databaseId == 'postgre'">'%'||#{procInsName}||'%'</if>
+				<if test="_databaseId == 'oracle'">'%'||#{procInsName}||'%'</if>
+				<if test="_databaseId == 'mssql'">'%'+#{procInsName}+'%'</if>
+				<if test="_databaseId == 'mysql'">concat('%',#{procInsName},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_cc(
+			id,
+			userid,
+			procdefid,
+			procinsid,
+			create_date,
+			create_by,
+			procdefname,
+			procinsname,
+			taskname
+		) VALUES (
+			#{id},
+			#{userId},
+			#{procDefId},
+			#{procInsId},
+			#{createDate},
+			#{createBy.id},
+			#{procDefName},
+			#{procInsName},
+			#{taskName}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_cc SET
+			userid = #{userId},
+			procdefid = #{procDefId},
+			procinsid = #{procInsId},
+			create_date = #{createDate},
+			create_by = #{createBy.id},
+			procdefname = #{procDefName},
+			procinsname = #{procInsName},
+			taskname = #{taskName}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_cc
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteByProcInsId">
+		DELETE FROM act_extension_cc
+		WHERE procinsid = #{procInsId}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_cc SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="FlowCopy">
+		select * FROM act_extension_cc  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

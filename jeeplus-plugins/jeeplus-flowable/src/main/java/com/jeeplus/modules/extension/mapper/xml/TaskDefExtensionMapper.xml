@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.TaskDefExtensionMapper">
+
+	<sql id="taskDefExtensionColumns">
+		a.id AS "id",
+		a.processdefid AS "processDefId",
+		a.taskdefid AS "taskDefId"
+	</sql>
+
+	<sql id="taskDefExtensionJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="TaskDefExtension" >
+		SELECT
+			<include refid="taskDefExtensionColumns"/>
+		FROM act_extension_taskdef a
+		<include refid="taskDefExtensionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="TaskDefExtension" >
+		SELECT
+			<include refid="taskDefExtensionColumns"/>
+		FROM act_extension_taskdef a
+		<include refid="taskDefExtensionJoins"/>
+		<where>
+			
+			${dataScope}
+			<if test="processDefId != null and processDefId != ''">
+				AND a.processdefid = #{processDefId}
+			</if>
+			<if test="taskDefId != null and taskDefId != ''">
+				AND a.taskdefid = #{taskDefId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="TaskDefExtension" >
+		SELECT
+			<include refid="taskDefExtensionColumns"/>
+		FROM act_extension_taskdef a
+		<include refid="taskDefExtensionJoins"/>
+		<where>
+			
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_taskdef(
+			id,
+			processdefid,
+			taskdefid
+		) VALUES (
+			#{id},
+			#{processDefId},
+			#{taskDefId}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_taskdef SET
+			processdefid = #{processDefId},
+			taskdefid = #{taskDefId}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_taskdef
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_taskdef SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="TaskDefExtension">
+		select * FROM act_extension_taskdef  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

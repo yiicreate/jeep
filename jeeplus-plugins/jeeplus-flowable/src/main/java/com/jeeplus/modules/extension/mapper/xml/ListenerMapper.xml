@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.ListenerMapper">
+
+	<sql id="listenerColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.listenertype AS "listenerType",
+		a.event AS "event",
+		a.valuetype AS "valueType",
+		a.value AS "value"
+	</sql>
+
+	<sql id="listenerJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="Listener" >
+		SELECT
+			<include refid="listenerColumns"/>
+		FROM act_extension_listener a
+		<include refid="listenerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Listener" >
+		SELECT
+			<include refid="listenerColumns"/>
+		FROM act_extension_listener a
+		<include refid="listenerJoins"/>
+		<where>
+
+			${dataScope}
+			<if test="name != null and name != ''">
+				AND a.name = #{name}
+			</if>
+			<if test="listenerType != null and listenerType != ''">
+				AND a.listenertype = #{listenerType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Listener" >
+		SELECT
+			<include refid="listenerColumns"/>
+		FROM act_extension_listener a
+		<include refid="listenerJoins"/>
+		<where>
+
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_listener(
+			id,
+			name,
+			listenertype,
+			event,
+			valuetype,
+			value
+		) VALUES (
+			#{id},
+			#{name},
+			#{listenerType},
+			#{event},
+			#{valueType},
+			#{value}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_listener SET
+			name = #{name},
+			listenertype = #{listenerType},
+			event = #{event},
+			valuetype = #{valueType},
+			value = #{value}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_listener
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_listener SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Listener">
+		select * FROM act_extension_listener  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

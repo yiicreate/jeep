@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.books.mapper.ListenReadMapper">
+
+	<sql id="listenReadColumns">
+		a.id AS "id",
+		a.book_name AS "bookName",
+		a.book_author AS "bookAuthor",
+		a.book_content AS "book",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="listenReadJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="ListenRead" >
+		SELECT
+			<include refid="listenReadColumns"/>
+		FROM listen_read a
+		<include refid="listenReadJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ListenRead" >
+		SELECT
+			<include refid="listenReadColumns"/>
+		FROM listen_read a
+		<include refid="listenReadJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="bookName != null and bookName != ''">
+				AND a.book_name LIKE
+				    <if test="_databaseId == 'postgre'">'%'||#{bookName}||'%'</if>
+					<if test="_databaseId == 'oracle'">'%'||#{bookName}||'%'</if>
+					<if test="_databaseId == 'mssql'">'%'+#{bookName}+'%'</if>
+					<if test="_databaseId == 'mysql'">concat('%',#{bookName},'%')</if>
+			</if>
+			<if test="bookAuthor != null and bookAuthor != ''">
+				AND a.book_author = #{bookAuthor}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ListenRead" >
+		SELECT
+			<include refid="listenReadColumns"/>
+		FROM listen_read a
+		<include refid="listenReadJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO listen_read(
+			id,
+			book_name,
+			book_author,
+			book_content,
+			create_by,
+			create_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{bookName},
+			#{bookAuthor},
+			#{book},
+			#{createBy.id},
+			#{createDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE listen_read SET
+			book_name = #{bookName},
+			book_author = #{bookAuthor},
+			book_content = #{book},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM listen_read
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE listen_read SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ListenRead">
+		select * FROM listen_read  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.moments.mapper.RemindMapper">
+
+	<sql id="remindColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.user AS "user",
+		a.share_id AS "shareId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+-- 		a.update_by AS "updateBy.id",
+-- 		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="remindJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="Remind" >
+		SELECT
+			<include refid="remindColumns"/>
+		FROM test_share_remind a
+		<include refid="remindJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Remind" >
+		SELECT
+			<include refid="remindColumns"/>
+		FROM test_share_remind a
+		<include refid="remindJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListByShare" resultType="Remind" >
+		SELECT
+		<include refid="remindColumns"/>
+		FROM test_share_remind a
+		<include refid="remindJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND share_id = #{id}
+		</where>
+		<choose>
+			<otherwise>
+				ORDER BY a.create_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="Remind" >
+		SELECT
+			<include refid="remindColumns"/>
+		FROM test_share_remind a
+		<include refid="remindJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO test_share_remind(
+			id,
+			name,
+			user,
+			share_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{user},
+			#{shareId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_share_remind SET
+			name = #{name},
+			user = #{user},
+			share_id = #{shareId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM test_share_remind
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE test_share_remind SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteByShare">
+		DELETE FROM test_share_remind
+		WHERE share_id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Remind">
+		select * FROM test_share_remind  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

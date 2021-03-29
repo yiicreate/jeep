@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.cppcc.mapper.ComCommentsMapper">
+
+	<sql id="comCommentsColumns">
+		a.id AS "id",
+		a.sort AS "sort",
+		a.parent_id AS "parentId",
+		a.comment_time AS "commentTime",
+		a.comment_user AS "commentUser.id",
+		a.com_data_id AS "comData.id",
+		a.comments AS "remarks",
+		a.del_flag AS "delFlag",
+
+
+
+
+		commentUser.name AS "commentUser.name"
+	</sql>
+
+	<sql id="comCommentsJoins">
+
+		LEFT JOIN sys_user commentUser ON commentUser.id = a.comment_user
+			LEFT JOIN cppcc_communication_data b ON b.id = a.com_data_id
+	</sql>
+
+
+	<select id="get" resultType="ComComments" >
+		SELECT
+			<include refid="comCommentsColumns"/>
+		FROM cppcc_communication_comments a
+		<include refid="comCommentsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ComComments" >
+		SELECT
+			<include refid="comCommentsColumns"/>
+		FROM cppcc_communication_comments a
+		<include refid="comCommentsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="comData != null and comData.id != null and comData.id != ''">
+				AND a.com_data_id = #{comData.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ComComments" >
+		SELECT
+			<include refid="comCommentsColumns"/>
+		FROM cppcc_communication_comments a
+		<include refid="comCommentsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO cppcc_communication_comments(
+			id,
+			sort,
+			parent_id,
+			comment_time,
+			comment_user,
+			com_data_id,
+			comments,
+			del_flag
+		) VALUES (
+			#{id},
+			#{sort},
+			#{parentId},
+			#{commentTime},
+			#{commentUser.id},
+			#{comData.id},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE cppcc_communication_comments SET
+			sort = #{sort},
+			parent_id = #{parentId},
+			comment_time = #{commentTime},
+			comment_user = #{commentUser.id},
+			com_data_id = #{comData.id},
+			comments = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM cppcc_communication_comments
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE com_data_id = #{comData.id}
+			</otherwise>
+		</choose>
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE cppcc_communication_comments SET
+			del_flag = #{DEL_FLAG_DELETE}
+		<choose>
+			<when test="id !=null and id != ''">
+				WHERE id = #{id}
+			</when>
+			<otherwise>
+				WHERE com_data_id = #{comData.id}
+			</otherwise>
+		</choose>
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ComComments">
+		select * FROM cppcc_communication_comments  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

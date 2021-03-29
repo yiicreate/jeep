@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.mail.mapper.MailTrashMapper">
+
+	<sql id="mailTrashColumns">
+		a.id AS "id",
+		a.status AS "status",
+		a.sender_id AS "sender.id",
+		a.receiverids AS "receiverIds",
+		a.sendtime AS "sendtime",
+		a.mail_id AS "mail.id",
+		a.create_by AS "createBy.id",
+		a.del_flag AS "delFlag",
+
+
+		sender.name AS "sender.name",
+
+
+
+		mail.title AS "mail.title",
+		mail.content AS "mail.content"
+	</sql>
+
+	<sql id="mailTrashJoins">
+
+		LEFT JOIN sys_user sender ON sender.id = a.sender_id
+		LEFT JOIN  plugin_mail mail ON mail.id = a.mail_id
+	</sql>
+
+
+	<select id="get" resultType="MailTrash" >
+		SELECT
+			<include refid="mailTrashColumns"/>
+		FROM plugin_mail_trash a
+		<include refid="mailTrashJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="MailTrash" >
+		SELECT
+			<include refid="mailTrashColumns"/>
+		FROM plugin_mail_trash a
+		<include refid="mailTrashJoins"/>
+		<where>
+
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="createBy != null">
+				AND a.create_by = #{createBy.id}
+			</if>
+
+			<if test="mail != null and mail.title != null and mail.title != ''">
+				AND ( mail.title like
+				<if test="_databaseId == 'postgre'">'%'||#{mail.title}||'%'</if>
+				<if test="_databaseId == 'oracle'">'%'||#{mail.title}||'%'</if>
+				<if test="_databaseId == 'mysql'">CONCAT('%', #{mail.title}, '%')</if>
+				<if test="_databaseId == 'mssql'">'%'+#{mail.title}+'%'</if>
+				or
+				mail.content like
+				<if test="_databaseId == 'postgre'">'%'||#{mail.title}||'%'</if>
+				<if test="_databaseId == 'oracle'">'%'||#{mail.title}||'%'</if>
+				<if test="_databaseId == 'mysql'">CONCAT('%', #{mail.title}, '%')</if>
+				<if test="_databaseId == 'mssql'">'%'+#{mail.title}+'%'</if>
+				)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="MailTrash" >
+		SELECT
+			<include refid="mailTrashColumns"/>
+		FROM plugin_mail_trash a
+		<include refid="mailTrashJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO plugin_mail_trash(
+			id,
+			status,
+			sender_id,
+			receiverids,
+			sendtime,
+			mail_id,
+			create_by,
+			del_flag
+		) VALUES (
+			#{id},
+			#{status},
+			#{sender.id},
+			#{receiverIds},
+			#{sendtime},
+			#{mail.id},
+			#{createBy.id},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE plugin_mail_trash SET
+			status = #{status},
+			sender_id = #{sender.id},
+			receiverids = #{receiverIds},
+			sendtime = #{sendtime},
+			mail_id = #{mail.id}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM plugin_mail_trash a
+		<where>
+			<if test="createBy != null">
+				AND a.create_by = #{createBy.id}
+			</if>
+		</where>
+
+	</select>
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM plugin_mail_trash
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE plugin_mail_trash SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="MailTrash">
+		select * FROM plugin_mail_trash  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

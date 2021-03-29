@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.moments.mapper.SupportMapper">
+
+	<sql id="supportColumns">
+		a.id AS "id",
+		a.pid AS "pid",
+		a.type AS "type",
+		a.content AS "content",
+		a.share_id AS "shareId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+-- 		a.update_by AS "updateBy.id",
+-- 		a.update_date AS "updateDate",
+-- 		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.name as "createBy.name"
+	</sql>
+
+	<sql id="supportJoins">
+		LEFT JOIN sys_user b ON b.id = a.create_by
+	</sql>
+
+
+	<select id="get" resultType="Support" >
+		SELECT
+			<include refid="supportColumns"/>
+		FROM test_share_support a
+		<include refid="supportJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="Support" >
+		SELECT
+			<include refid="supportColumns"/>
+		FROM test_share_support a
+		<include refid="supportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListByShare" resultType="Support" >
+		SELECT
+		<include refid="supportColumns"/>
+		FROM test_share_support a
+		<include refid="supportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.share_id = #{id}
+			${dataScope}
+		</where>
+			ORDER BY a.create_date
+	</select>
+
+	<select id="findAllList" resultType="Support" >
+		SELECT
+			<include refid="supportColumns"/>
+		FROM test_share_support a
+		<include refid="supportJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO test_share_support(
+			id,
+			pid,
+			type,
+			content,
+			share_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{pid},
+			#{type},
+			#{content},
+			#{shareId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_share_support SET
+			pid = #{pid},
+			type = #{type},
+			content = #{content},
+			share_id = #{shareId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM test_share_support
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteByShare">
+		DELETE FROM test_share_support
+		WHERE share_id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE test_share_support SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="Support">
+		select * FROM test_share_support  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

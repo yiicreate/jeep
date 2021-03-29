@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.database.datalink.mapper.DataSourceMapper">
+
+    <sql id="dataSourceColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.enname AS "enName",
+        a.type AS "type",
+        a.driver AS "driver",
+        a.host AS "host",
+        a.port AS "port",
+        a.dbname AS "dbname",
+        a.url AS "url",
+        a.username AS "username",
+        a.password AS "password",
+        a.invokes AS "invokes",
+        a.create_date AS "createDate",
+        a.update_date AS "updateDate"
+    </sql>
+
+    <sql id="dataSourceJoins">
+
+    </sql>
+
+
+    <select id="get" resultType="DataSource">
+        SELECT
+        <include refid="dataSourceColumns"/>
+        FROM plugin_datasource_link a
+        <include refid="dataSourceJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="DataSource">
+        SELECT
+        <include refid="dataSourceColumns"/>
+        FROM plugin_datasource_link a
+        <include refid="dataSourceJoins"/>
+        <where>
+
+            ${dataScope}
+            <if test="name != null and name != ''">
+                AND a.name LIKE
+                <if test="_databaseId == 'postgre'">'%'||#{name}||'%'</if>
+                <if test="_databaseId == 'oracle'">'%'||#{name}||'%'</if>
+                <if test="_databaseId == 'mssql'">'%'+#{name}+'%'</if>
+                <if test="_databaseId == 'mysql'">concat('%',#{name},'%')</if>
+            </if>
+            <if test="type != null and type != ''">
+                AND a.type = #{type}
+            </if>
+            <if test="dbname != null and dbname != ''">
+                AND a.dbname = #{dbname}
+            </if>
+               AND a.id != 'master'
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="DataSource">
+        SELECT
+        <include refid="dataSourceColumns"/>
+        FROM plugin_datasource_link a
+        <include refid="dataSourceJoins"/>
+        <where>
+
+            ${dataScope}
+            AND a.id != 'master'
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO plugin_datasource_link(
+        id,
+        name,
+        enname,
+        type,
+        driver,
+        host,
+        port,
+        dbname,
+        url,
+        username,
+        password,
+        invokes,
+        create_date,
+        update_date
+        ) VALUES (
+        #{id},
+        #{name},
+        #{enName},
+        #{type},
+        #{driver},
+        #{host},
+        #{port},
+        #{dbname},
+        #{url},
+        #{username},
+        #{password},
+        #{invokes},
+        #{createDate},
+        #{updateDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE plugin_datasource_link SET
+        name = #{name},
+        enname = #{enName},
+        type = #{type},
+        driver = #{driver},
+        host = #{host},
+        port = #{port},
+        dbname = #{dbname},
+        url = #{url},
+        username = #{username},
+        password = #{password},
+        invokes = #{invokes},
+        create_date = #{createDate},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+
+    <!--物理删除-->
+    <update id="delete">
+        DELETE FROM plugin_datasource_link
+        WHERE id = #{id}
+    </update>
+
+    <!--逻辑删除-->
+    <update id="deleteByLogic">
+        UPDATE plugin_datasource_link SET
+        del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+    <select id="findUniqueByProperty" resultType="DataSource">
+        select * FROM plugin_datasource_link where ${propertyName} = #{value}
+    </select>
+
+</mapper>

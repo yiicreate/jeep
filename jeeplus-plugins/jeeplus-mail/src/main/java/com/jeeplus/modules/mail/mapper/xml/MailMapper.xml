@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.mail.mapper.MailMapper">
+
+    <sql id="mailColumns">
+        a.id AS "id",
+        a.title AS "title",
+        a.overview AS "overview",
+        a.content AS "content"
+    </sql>
+
+    <sql id="mailJoins">
+    </sql>
+
+    <resultMap type="Mail" id="MailResult" autoMapping="true">
+        <result column="content" property="content"   typeHandler="com.jeeplus.core.mapper.ConvertBlobTypeHandler"/>
+    </resultMap>
+    <select id="get" resultMap="MailResult">
+        SELECT
+        <include refid="mailColumns"/>
+        FROM plugin_mail a
+        <include refid="mailJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultMap="MailResult">
+        SELECT
+        <include refid="mailColumns"/>
+        FROM plugin_mail a
+        <include refid="mailJoins"/>
+        <where>
+
+            <if test="title != null and title != ''">
+                AND a.title LIKE
+                <if test="_databaseId == 'postgre'">'%'||#{title}||'%'</if>
+                <if test="_databaseId == 'oracle'">'%'||#{title}||'%'</if>
+                <if test="_databaseId == 'mssql'">'%'+#{title}+'%'</if>
+                <if test="_databaseId == 'mysql'">concat('%',#{title},'%')</if>
+            </if>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultMap="MailResult">
+        SELECT
+        <include refid="mailColumns"/>
+        FROM plugin_mail a
+        <include refid="mailJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO plugin_mail(
+        id,
+        title,
+        overview,
+        content
+        ) VALUES (
+        #{id},
+        #{title},
+        #{overview},
+        #{content, jdbcType=BLOB}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE plugin_mail SET
+        title = #{title},
+        overview = #{overview},
+        content = #{content, jdbcType=BLOB}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        DELETE FROM plugin_mail
+        WHERE id = #{id}
+    </update>
+
+    <!-- <update id="deleteByLogic">
+        DELETE FROM plugin_mail
+        WHERE id = #{id}
+    </update>-->
+
+</mapper>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.committee.mapper.CommitteeIntegralMapper">
+
+	<sql id="committeeIntegralColumns">
+		a.id AS "id",
+		a.org AS "org",
+		a.integral AS "integral",
+		a.committee_id AS "committeeId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="committeeIntegralJoins">
+
+		LEFT JOIN sys_office org ON org.id = a.org
+		LEFT JOIN sys_user committeeId ON committeeId.id = a.committee_id
+	</sql>
+
+
+	<select id="get" resultType="CommitteeIntegral" >
+		SELECT
+			<include refid="committeeIntegralColumns"/>
+		FROM committee_integral a
+		<include refid="committeeIntegralJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="CommitteeIntegral" >
+		SELECT
+			<include refid="committeeIntegralColumns"/>
+		FROM committee_integral a
+		<include refid="committeeIntegralJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="org != null and org != ''">
+				AND a.org LIKE
+				    <if test="_databaseId == 'postgre'">'%'||#{org}||'%'</if>
+					<if test="_databaseId == 'oracle'">'%'||#{org}||'%'</if>
+					<if test="_databaseId == 'mssql'">'%'+#{org}+'%'</if>
+					<if test="_databaseId == 'mysql'">concat('%',#{org},'%')</if>
+			</if>
+			<if test="committeeId != null and committeeId != ''">
+				AND a.committee_id LIKE
+				    <if test="_databaseId == 'postgre'">'%'||#{committeeId}||'%'</if>
+					<if test="_databaseId == 'oracle'">'%'||#{committeeId}||'%'</if>
+					<if test="_databaseId == 'mssql'">'%'+#{committeeId}+'%'</if>
+					<if test="_databaseId == 'mysql'">concat('%',#{committeeId},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="CommitteeIntegral" >
+		SELECT
+			<include refid="committeeIntegralColumns"/>
+		FROM committee_integral a
+		<include refid="committeeIntegralJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO committee_integral(
+			id,
+			org,
+			integral,
+			committee_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{org},
+			#{integral},
+			#{committeeId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE committee_integral SET
+			org = #{org},
+			integral = #{integral},
+			committee_id = #{committeeId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM committee_integral
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE committee_integral SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="CommitteeIntegral">
+		select * FROM committee_integral  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

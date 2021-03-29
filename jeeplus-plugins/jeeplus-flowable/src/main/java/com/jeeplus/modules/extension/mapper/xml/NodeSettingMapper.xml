@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.NodeSettingMapper">
+
+	<sql id="nodeSettingColumns">
+		a.id AS "id",
+		a.process_def_id AS "processDefId",
+		a.task_def_id AS "taskDefId",
+		a.t_key AS "key",
+		a.t_value AS "value"
+	</sql>
+
+	<sql id="nodeSettingJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="NodeSetting" >
+		SELECT
+			<include refid="nodeSettingColumns"/>
+		FROM act_extension_node_setting a
+		<include refid="nodeSettingJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="NodeSetting" >
+		SELECT
+			<include refid="nodeSettingColumns"/>
+		FROM act_extension_node_setting a
+		<include refid="nodeSettingJoins"/>
+		<where>
+
+			${dataScope}
+			<if test="processDefId != null and processDefId != ''">
+				AND a.process_def_id = #{processDefId}
+			</if>
+			<if test="taskDefId != null and taskDefId != ''">
+				AND a.task_def_id = #{taskDefId}
+			</if>
+			<if test="key != null and key != ''">
+				AND a.t_key = #{key}
+			</if>
+			<if test="value != null and value != ''">
+				AND a.t_value = #{value}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="NodeSetting" >
+		SELECT
+			<include refid="nodeSettingColumns"/>
+		FROM act_extension_node_setting a
+		<include refid="nodeSettingJoins"/>
+		<where>
+
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_node_setting(
+			id,
+			process_def_id,
+			task_def_id,
+			t_key,
+			t_value
+		) VALUES (
+			#{id},
+			#{processDefId},
+			#{taskDefId},
+			#{key},
+			#{value}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_node_setting SET
+			process_def_id = #{processDefId},
+			task_def_id = #{taskDefId},
+			t_key = #{key},
+			t_value = #{value}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_node_setting
+		WHERE id = #{id}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_node_setting SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="NodeSetting">
+		select * FROM act_extension_node_setting  where ${propertyName} = #{value}
+	</select>
+
+	<select id="queryByDefIdAndTaskId" resultType="NodeSetting" >
+		SELECT
+		<include refid="nodeSettingColumns"/>
+		FROM act_extension_node_setting a
+		<include refid="nodeSettingJoins"/>
+		WHERE a.process_def_id = #{processDefId} and  a.task_def_id = #{taskDefId}
+	</select>
+
+	<select id="queryByKey" resultType="NOdeSetting" >
+		SELECT
+		<include refid="nodeSettingColumns"/>
+		FROM act_extension_node_setting a
+		<include refid="nodeSettingJoins"/>
+		WHERE a.process_def_id = #{processDefId} and  a.task_def_id = #{taskDefId} and  a.t_key = #{key}
+	</select>
+
+
+	<update id="deleteByDefIdAndTaskId">
+		DELETE FROM act_extension_node_setting
+		WHERE process_def_id = #{processDefId} and  task_def_id = #{taskDefId}
+	</update>
+
+	<update id="deleteByProcessDefId">
+		DELETE FROM act_extension_node_setting
+		WHERE process_def_id = #{processDefId}
+	</update>
+
+</mapper>

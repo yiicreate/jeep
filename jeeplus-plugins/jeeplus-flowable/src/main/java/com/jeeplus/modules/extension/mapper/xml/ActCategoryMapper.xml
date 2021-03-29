@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.extension.mapper.ActCategoryMapper">
+
+    <resultMap id="actCategoryResult" type="ActCategory">
+   		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="sort" column="sort" />
+		<result property="parentIds" column="parentIds" />
+    </resultMap>
+
+	<sql id="actCategoryColumns">
+		a.id AS "id",
+		a.parent_id AS "parent.id",
+		a.parent_ids AS "parentIds",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.remarks AS "remarks"
+	</sql>
+
+
+
+
+	<sql id="actCategoryJoins">
+
+	</sql>
+
+
+
+	<select id="get" resultType="ActCategory">
+		SELECT
+			<include refid="actCategoryColumns"/>
+		FROM act_extension_category a
+		<include refid="actCategoryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ActCategory">
+		SELECT
+			<include refid="actCategoryColumns"/>
+		FROM act_extension_category a
+		<include refid="actCategoryJoins"/>
+		<where>
+
+			${dataScope}
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="parentIds != null and parentIds != ''">
+				AND a.parent_ids LIKE
+					<if test="_databaseId == 'postgre'">'%'||#{parentIds}||'%'</if>
+					<if test="_databaseId == 'oracle'">'%'||#{parentIds}||'%'</if>
+					<if test="_databaseId == 'mssql'">'%'+#{parentIds}+'%'</if>
+					<if test="_databaseId == 'mysql'">concat('%',#{parentIds},'%')</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+					<if test="_databaseId == 'postgre'">'%'||#{name}||'%'</if>
+					<if test="_databaseId == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="_databaseId == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="_databaseId == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+
+	<select id="findAllList" resultType="ActCategory">
+		SELECT
+			<include refid="actCategoryColumns"/>
+		FROM act_extension_category a
+		<include refid="actCategoryJoins"/>
+		<where>
+
+			${dataScope}
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+
+	<select id="getChildren" parameterType="String" resultMap="actCategoryResult">
+        select * from act_extension_category where parent_id = #{id} ORDER BY sort
+    </select>
+
+	<select id="findByParentIdsLike" resultType="ActCategory">
+		SELECT
+			a.id,
+			a.parent_id AS "parent.id",
+			a.parent_ids
+		FROM act_extension_category a
+		<include refid="actCategoryJoins"/>
+		<where>
+
+			AND a.parent_ids LIKE #{parentIds}
+		</where>
+		ORDER BY a.sort ASC
+	</select>
+
+	<insert id="insert">
+		INSERT INTO act_extension_category(
+			   id,
+			   parent_id,
+			   parent_ids,
+			   name,
+			   sort,
+			   remarks
+		) VALUES (
+			#{id},
+			#{parent.id},
+			#{parentIds},
+			#{name},
+			#{sort},
+			#{remarks}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE act_extension_category SET
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds},
+			name = #{name},
+			sort = #{sort},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateParentIds">
+		UPDATE act_extension_category SET
+			parent_id = #{parent.id},
+			parent_ids = #{parentIds}
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM act_extension_category
+		WHERE id = #{id} OR parent_ids LIKE
+		<if test="_databaseId == 'postgre'">'%,'||#{id}||',%'</if>
+		<if test="_databaseId == 'oracle'">'%,'||#{id}||',%'</if>
+		<if test="_databaseId == 'mssql'">'%,'+#{id}+',%'</if>
+        <if test="_databaseId == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE act_extension_category SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id} OR parent_ids LIKE
+		<if test="_databaseId == 'postgre'">'%,'||#{id}||',%'</if>
+		<if test="_databaseId == 'oracle'">'%,'||#{id}||',%'</if>
+		<if test="_databaseId == 'mssql'">'%,'+#{id}+',%'</if>
+        <if test="_databaseId == 'mysql'">CONCAT('%,', #{id}, ',%')</if>
+	</update>
+
+</mapper>

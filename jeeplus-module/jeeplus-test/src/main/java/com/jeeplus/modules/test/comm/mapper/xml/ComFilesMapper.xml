@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.test.comm.mapper.ComFilesMapper">
+
+	<sql id="comFilesColumns">
+		a.id AS "id",
+		a.source AS "source",
+		a.owner_id AS "ownerId",
+		a.url AS "url",
+		a.type AS "type",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+-- 		a.update_by AS "updateBy.id",
+-- 		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+
+	<sql id="comFilesJoins">
+
+	</sql>
+
+
+	<select id="get" resultType="ComFiles" >
+		SELECT
+			<include refid="comFilesColumns"/>
+		FROM test_com_file a
+		<include refid="comFilesJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="ComFiles" >
+		SELECT
+			<include refid="comFilesColumns"/>
+		FROM test_com_file a
+		<include refid="comFilesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+
+	<select id="findListBySourceAOwnerId" resultType="ComFiles" >
+		SELECT
+		<include refid="comFilesColumns"/>
+		FROM test_com_file a
+		<include refid="comFilesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND source = #{source}
+			AND owner_id = #{ownerId}
+		</where>
+		<choose>
+			<otherwise>
+				ORDER BY a.create_date
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ComFiles" >
+		SELECT
+			<include refid="comFilesColumns"/>
+		FROM test_com_file a
+		<include refid="comFilesJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO test_com_file(
+			id,
+			source,
+			owner_id,
+			url,
+			type,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{source},
+			#{ownerId},
+			#{url},
+			#{type},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE test_com_file SET
+			source = #{source},
+			owner_id = #{ownerId},
+			url = #{url},
+			type = #{type},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM test_com_file
+		WHERE id = #{id}
+	</update>
+
+	<!--物理删除-->
+	<update id="deleteBySource">
+		DELETE FROM test_com_file
+		WHERE owner_id = #{ownerId}
+		AND source = #{source}
+	</update>
+
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE test_com_file SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="ComFiles">
+		select * FROM test_com_file  where ${propertyName} = #{value}
+	</select>
+
+</mapper>

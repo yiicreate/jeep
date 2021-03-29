@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.database.datamodel.mapper.DataParamMapper">
+
+    <sql id="dataParamColumns">
+        a.id AS "id",
+        a.dsid AS "dataSet.id",
+        a.field AS "field",
+        a.defaultValue AS "defaultValue",
+        a.sort AS "sort"
+    </sql>
+
+    <sql id="dataParamJoins">
+
+    </sql>
+
+
+    <select id="get" resultType="DataParam">
+        SELECT
+        <include refid="dataParamColumns"/>
+        FROM plugin_datasource_model_params a
+        <include refid="dataParamJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="DataParam">
+        SELECT
+        <include refid="dataParamColumns"/>
+        FROM plugin_datasource_model_params a
+        <include refid="dataParamJoins"/>
+        <where>
+
+            ${dataScope}
+            <if test="dataSet != null and dataSet.id != ''">
+                AND a.dsId = #{dataSet.id}
+            </if>
+            <if test="field != null and field != ''">
+                AND a.field = #{field}
+            </if>
+            <if test="defaultValue != null and defaultValue != ''">
+                AND a.defaultValue = #{defaultValue}
+            </if>
+        </where>
+        ORDER BY a.sort asc
+    </select>
+
+    <select id="findAllList" resultType="DataParam">
+        SELECT
+        <include refid="dataParamColumns"/>
+        FROM plugin_datasource_model_params a
+        <include refid="dataParamJoins"/>
+        <where>
+
+            ${dataScope}
+        </where>
+        ORDER BY a.sort asc
+    </select>
+
+    <insert id="insert">
+        INSERT INTO plugin_datasource_model_params(
+        id,
+        dsId,
+        field,
+        defaultValue,
+        sort
+        ) VALUES (
+        #{id},
+        #{dataSet.id},
+        #{field},
+        #{defaultValue},
+        #{sort}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE plugin_datasource_model_params SET
+        dsId = #{dataSet.id},
+        field = #{field},
+        defaultValue = #{defaultValue}
+        WHERE id = #{id}
+    </update>
+
+
+    <!--物理删除-->
+    <update id="delete">
+        DELETE FROM plugin_datasource_model_params
+        WHERE id = #{id}
+    </update>
+
+    <!--物理删除-->
+    <update id="deleteByDataSetId" parameterType="String">
+        DELETE FROM plugin_datasource_model_params
+        WHERE dsid = #{id}
+    </update>
+    <!--逻辑删除-->
+    <update id="deleteByLogic">
+        UPDATE plugin_datasource_model_params SET
+        del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+
+
+    <!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+    <select id="findUniqueByProperty" resultType="DataParam">
+        select * FROM plugin_datasource_model_params where ${propertyName} = #{value}
+    </select>
+
+</mapper>
